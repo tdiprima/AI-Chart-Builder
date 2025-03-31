@@ -1,7 +1,7 @@
 # AIChartBuilder
 AI-powered chart building
 
-Here are some example prompts you can use with the Plotly AI/Dash app to generate charts:
+Here are some example prompts you can use with the Plotly AI/Dash app (chat\_chart.py) to generate charts:
 
 **Simple Charts**
 
