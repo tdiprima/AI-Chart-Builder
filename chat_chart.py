@@ -4,21 +4,20 @@ This app uses OpenAI's GPT-4 to generate chart specifications based on user inpu
 
 Author: Tammy DiPrima
 """
-import dash
-from dash import html, dcc
-from dash.dependencies import Input, Output
-import plotly.express as px
-import plotly.graph_objects as go
-from openai import OpenAI
 import json
 import os
+
+import dash
+import plotly.express as px
+from dash import html, dcc
+from dash.dependencies import Input, Output
+from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Create a Dash app
 app = dash.Dash(__name__)
 
-# Set your OpenAI API key
 
 def parse_chart_request(input_text):
     # Prompt for OpenAI to interpret chart requests
@@ -49,6 +48,7 @@ def parse_chart_request(input_text):
     except Exception as e:
         print(f"Error parsing chart request: {e}")
         return None
+
 
 # Define a function to generate a chart based on user input
 def generate_chart(input_text):
@@ -106,23 +106,20 @@ def generate_chart(input_text):
         print(f"Error creating chart: {e}")
         return px.line(x=[1, 2, 3], y=[1, 2, 3], title="Error creating chart")
 
+
 # Create a Dash layout with a text input and a chart output
 app.layout = html.Div([
     html.H1("AI Chart Builder", style={'textAlign': 'center', 'marginBottom': 30}),
     html.Div([
         html.Label("Describe the chart you want (e.g., 'Show me a bar chart of monthly sales'):", 
                   style={'marginBottom': 10}),
-        dcc.Input(
-            id="input-text",
-            type="text",
-            value="",
-            style={'width': '100%', 'padding': '10px', 'marginBottom': '20px'}
-        ),
+        dcc.Textarea(id='input-text', placeholder='Ask for a chart...', style={'width': '100%', 'height': 100}),
     ], style={'width': '80%', 'margin': 'auto'}),
     html.Div([
         dcc.Graph(id="chart-output"),
     ], style={'width': '80%', 'margin': 'auto'}),
 ], style={'padding': '20px'})
+
 
 # Define callback to update chart based on input text
 @app.callback(
@@ -133,6 +130,7 @@ def update_chart(input_text):
     if not input_text:
         return px.line(x=[1, 2, 3], y=[1, 2, 3], title="Enter a chart description to begin")
     return generate_chart(input_text)
+
 
 # Run the Dash app
 if __name__ == "__main__":

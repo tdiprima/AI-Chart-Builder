@@ -9,12 +9,13 @@ Pie chart of age
 
 Author: Tammy DiPrima
 """
+import re
+
 import dash
+import pandas as pd
+import plotly.express as px
 from dash import html, dcc, Input, Output, State
 from openai import OpenAI
-import plotly.express as px
-import pandas as pd
-import re
 
 client = OpenAI()
 
@@ -33,6 +34,7 @@ app.layout = html.Div([
     html.Div(id='error', style={'color': 'red'})
 ])
 
+
 @app.callback(
     Output('output-chart', 'figure'),
     Output('error', 'children'),
@@ -40,8 +42,6 @@ app.layout = html.Div([
     State('prompt', 'value'),
     prevent_initial_call=True
 )
-
-
 def generate_chart(n, prompt):
     try:
         response = client.chat.completions.create(model="gpt-4",
