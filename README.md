@@ -1,6 +1,16 @@
 # AIChartBuilder
 AI-powered chart building
 
+---
+
+**AI Chart Builder** lets you type in a natural language prompt like *"Show a line chart of average patient heart rate over the past 7 days"* and then uses GPT-4 to generate the actual Python code to make that chart. The app runs the code and displays the chart right on the page using Plotly. It's built with Dash and handles errors gracefully, so if something goes wrong, it won't crash — it just tells you what happened.
+
+No more manually scripting visualizations. Just say what you want, and it builds it.
+
+---
+
+## Example Prompts
+
 Here are some example prompts you can use with the Plotly AI/Dash app ([chart_app.py](chart_app.py)) to generate charts:
 
 **Simple Charts**
@@ -32,5 +42,3 @@ Here are some example prompts you can use with the Plotly AI/Dash app ([chart_ap
 1. Plot a chart of the most popular memes on the internet over the past year.
 2. Create a chart of the top 10 most expensive cars in the world.
 3. Show a chart of the average height of NBA players over the past 20 years.
-
-<br>
