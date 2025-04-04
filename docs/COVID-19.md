@@ -43,4 +43,4 @@ fig.show()
 - **Y-axis**: Weekly case numbers (in thousands).
 - **Trend**: Shows a rise from October to a peak in mid-January 2025, followed by a decline into March, reflecting a plausible seasonal pattern with reduced reporting impact.
 
-<br>
+&mdash; _AI-generated._

@@ -1,13 +1,16 @@
 # AIChartBuilder
-AI-powered chart building
-
----
 
 **AI Chart Builder** lets you type in a natural language prompt like *"Show a line chart of average patient heart rate over the past 7 days"* and then uses GPT-4 to generate the actual Python code to make that chart. The app runs the code and displays the chart right on the page using Plotly. It's built with Dash and handles errors gracefully, so if something goes wrong, it won't crash — it just tells you what happened.
 
 No more manually scripting visualizations. Just say what you want, and it builds it.
 
----
+## Usage
+
+```sh
+python chart_app.py
+```
+
+Navigate to: http://127.0.0.1:8050/
 
 ## Example Prompts
 
@@ -21,8 +24,8 @@ Here are some example prompts you can use with the Plotly AI/Dash app ([chart_ap
 
 **Time Series Charts**
 
-1. Plot the daily closing prices of the S&P 500 index for the past 5 years.
-2. Create a chart of the average temperature in New York City over the past 10 years.
+1. Plot the daily closing prices of the S&P 500 index for the past year.
+2. Create a chart of the average temperature in New York City over the past year.
 3. Show a chart of the number of COVID-19 cases in the United States over the past 6 months.
 
 **Geographic Charts**
@@ -41,4 +44,19 @@ Here are some example prompts you can use with the Plotly AI/Dash app ([chart_ap
 
 1. Plot a chart of the most popular memes on the internet over the past year.
 2. Create a chart of the top 10 most expensive cars in the world.
-3. Show a chart of the average height of NBA players over the past 20 years.
+3. Show a chart of the average height of NBA players over the past year.
+
+<!-- 
+Here are ten example prompts aimed at generating relatively small or straightforward data sets:
+
+1. Plot a line chart of the stock prices of Apple over the past year.
+2. Create a bar chart of the top 5 countries by GDP.
+3. Plot a map of the world showing the population density of each country.
+4. Generate a pie chart of the 5 most-used social media platforms among a group of 100 people. 
+5. Plot a line chart showing monthly temperature averages in 3 different cities.
+6. Create a bar chart comparing the monthly sales of three products over 6 months.
+7. Plot a scatter chart for 10 sample data points (x vs. y) to visualize any potential correlation.
+8. Generate a stacked bar chart of three categories of expenses (e.g., rent, food, utilities) across 4 months.
+9. Plot a pie chart of the distribution of 5 movie genres based on the number of films in a small festival.
+10. Create a bar chart comparing the average daily step counts for a group of 5 friends over 1 week.
+-->

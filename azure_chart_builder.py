@@ -1,31 +1,36 @@
+"""
+AI Chart Builder (Azure AI Foundry / gpt-4o Deployment)
+This app uses Azure OpenAI to generate charts based on user input and Plotly to render the charts.
+
+Author: Tammy DiPrima (modified for Azure)
+"""
+import os
 import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 from dash import html, dcc, Input, Output, State, exceptions
-from openai import OpenAI
+from openai import AzureOpenAI
 import re
 import pandas_datareader as pdr
 import datetime
+from dotenv import load_dotenv
 
-client = OpenAI()
+load_dotenv()
+
+# ==============================
+# Azure OpenAI Configuration
+# ==============================
+client = AzureOpenAI(
+  azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+  api_key=os.getenv("AZURE_OPENAI_KEY"),
+  api_version=os.getenv("OPENAI_API_VERSION")
+)
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div([
     html.H2("AI Chart Builder", style={'textAlign': 'center'}),
-    dcc.Dropdown(
-        id='model-dropdown',
-        options=[
-            {'label': 'GPT-3.5 Turbo', 'value': 'gpt-3.5-turbo'},
-            {'label': 'GPT-4o', 'value': 'gpt-4o'},
-            {'label': 'GPT-4o Mini', 'value': 'gpt-4o-mini'},
-            {'label': 'GPT-4.5 Preview', 'value': 'gpt-4.5-preview'},
-            {'label': 'o1 Mini', 'value': 'o1-mini'}
-        ],
-        value='gpt-4o',  # Default model
-        style={'width': '100%', 'marginBottom': 10}
-    ),
     dcc.Textarea(
         id='prompt',
         placeholder='Ask for a chart (e.g., "Line chart of average patient heart rate over 7 days")',
@@ -54,27 +59,22 @@ app.layout = html.Div([
         Input('submit', 'n_clicks'),
         Input('retry', 'n_clicks')
     ],
-    [
-        State('prompt', 'value'),
-        State('model-dropdown', 'value')  # Add the model dropdown state
-    ],
+    [State('prompt', 'value')],
     prevent_initial_call=True
 )
-def generate_chart(submit_clicks, retry_clicks, prompt, selected_model):
+def generate_chart(submit_clicks, retry_clicks, prompt):
     ctx = dash.callback_context
 
     if not ctx.triggered:
         raise exceptions.PreventUpdate
 
-    # Clear error and chart first
-    # (So the UI is wiped clean before generating a new chart or showing a new error)
+    # Clear previous chart and error
     fig = {}
     error_msg = ""
     feedback = ""
 
     # Check if prompt is empty or just whitespace
     if not prompt or not prompt.strip():
-        # Return now so we don't proceed with chart creation
         return fig, "Error: Please enter a prompt.", feedback, {'display': 'none'}
 
     # Provide initial feedback
@@ -82,39 +82,39 @@ def generate_chart(submit_clicks, retry_clicks, prompt, selected_model):
     retry_style = {'display': 'none'}
 
     try:
-        # Call OpenAI API with the selected model
+        # Call Azure OpenAI Chat Completion
         response = client.chat.completions.create(
-            model=selected_model,  # Use the selected model from the dropdown
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a Python developer tasked with generating only Plotly Express code. "
-                        "Your response must contain ONLY the Python code with no explanations, comments, or additional text. "
-                        "Do not include backticks, markdown, or any other formatting. The code should include all "
-                        "necessary data definitions (e.g., DataFrames or dictionaries), REAL data, python imports, and variable assignments. "
-                        "You MUST provide all data. Do not reference any csv files. DO NOT USE package yfinance. "
-                        "DO NOT GENERATE RANDOM DATA. If you cannot find any data, then return a chart with title saying \"No data found\". "
-                        "Generate only the Plotly Express Python code. No explanations or text, just the code."
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": (
-                        f"Generate only the Plotly Express Python code for: {prompt}. "
-                        "No explanations or text, just the code."
-                    )
-                }
-            ],
-            temperature=0.2,  # Lower temperature for more focused, less creative responses
-            top_p=0.1         # Narrow down the token selection
-        )
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a Python developer tasked with generating only Plotly Express code. "
+                    "Your response must contain ONLY the Python code with no explanations, comments, "
+                    "or additional text. Do not include backticks, markdown, or any other formatting. "
+                    "The code should include all necessary data definitions (e.g., DataFrames or dictionaries), "
+                    "data, python imports, and variable assignments. You MUST provide all data. "
+                    "Do not reference any csv files. DO NOT USE package yfinance. "
+                    "Generate only the Plotly Express Python code. No explanations or text, just the code."
+                )
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Generate only the Plotly Express Python code for: {prompt}. "
+                    "No explanations or text, just the code."
+                )
+            }
+        ],
+        model=os.getenv("DEPLOYMENT_NAME"),
+        max_tokens=500,
+        temperature=0.2,
+        top_p=0.1)
 
-        # Get the response content
+        # Extract the generated code
         code = response.choices[0].message.content.strip()
         code = re.sub(r"```(?:python)?|```", "", code).strip()
 
-        # Remove specific unwanted lines or text (e.g., yfinance messages)
+        # Remove specific unwanted lines or text
         unwanted_lines = [
             "YF.download() has changed argument auto_adjust default to True",
             "[*********************100%***********************]  1 of 1 completed"
@@ -133,18 +133,18 @@ def generate_chart(submit_clicks, retry_clicks, prompt, selected_model):
 
         print(code)
 
-        # Ensure there's still some code left to execute
+        # Ensure there's still some code left
         if not code:
             raise ValueError("No valid code remaining after filtering.")
 
-        # Execute the cleaned code
+        # Execute the code
         local_vars = {'px': px, 'pd': pd, 'pdr': pdr, 'datetime': datetime}
         exec(code, {}, local_vars)
 
         if 'fig' not in local_vars or local_vars['fig'] is None:
             raise ValueError("Failed to generate a valid Plotly figure. The figure object is None.")
 
-        # Return the new figure, with cleared error and feedback
+        # Return the new figure (error/feedback cleared)
         return local_vars['fig'], "", "", {'display': 'none'}
 
     except Exception as e:
@@ -168,7 +168,7 @@ def generate_chart(submit_clicks, retry_clicks, prompt, selected_model):
             )
 
         print(e)
-        return {}, error_msg, "", {'display': 'block'}  # Show error, keep chart cleared
+        return {}, error_msg, "", {'display': 'block'}
 
 
 if __name__ == '__main__':
