@@ -92,8 +92,10 @@ def generate_chart(submit_clicks, retry_clicks, prompt):
                     "Your response must contain ONLY the Python code with no explanations, comments, "
                     "or additional text. Do not include backticks, markdown, or any other formatting. "
                     "The code should include all necessary data definitions (e.g., DataFrames or dictionaries), "
-                    "data, python imports, and variable assignments. You MUST provide all data. "
+                    "REAL data, python imports, and variable assignments. You MUST provide all data. "
                     "Do not reference any csv files. DO NOT USE package yfinance. "
+                    "DO NOT GENERATE RANDOM DATA. If you cannot find any data, then return a chart with title saying \"No data found\". "
+                    "Note the actual date of the dataset in the title of the chart. "
                     "Generate only the Plotly Express Python code. No explanations or text, just the code."
                 )
             },
