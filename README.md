@@ -11,14 +11,14 @@ While the data has been reviewed for accuracy, some hallucinations may still sne
 ## Usage
 
 ```sh
-python chart_app.py
+python script.py
 ```
 
 Navigate to: http://127.0.0.1:8050/
 
 ## Example Prompts
 
-Here are some example prompts you can use with the Plotly AI/Dash app ([chart_app.py](chart_app.py)) to generate charts:
+Here are some example prompts you can use with the Plotly AI/Dash app to generate charts:
 
 **Simple Charts**
 
