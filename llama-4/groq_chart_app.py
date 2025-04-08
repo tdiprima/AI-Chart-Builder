@@ -2,6 +2,7 @@
 AI Chart Builder (Groq Deployment)
 LLaMA 4 showed potential, but it didn't quite align with the specific needs of my project.
 I ran into a few reliability and instruction-following issues that made it tough to integrate effectively.
+LLaMA-4 is exhibiting a high level of creative inference, though not necessarily grounded in factual accuracy.
 I'm looking forward to seeing how future iterations evolve.
 
 Author: Tammy DiPrima (modified for Groq)
@@ -111,7 +112,8 @@ def generate_chart(submit_clicks, retry_clicks, prompt):
                 }
             ],
             model="meta-llama/llama-4-scout-17b-16e-instruct",
-            max_tokens=2000,
+            # model="llama3-70b-8192",  # Will it handle longer outputs better? No.
+            max_tokens=4096,  # 500–2,000 for efficiency
             temperature=0.05,
             top_p=0.05,
             timeout=30  # Increase timeout to 30 seconds
