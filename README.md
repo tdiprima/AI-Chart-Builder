@@ -6,6 +6,10 @@ The `ai_chart_builder.py` script is a unified application that generates charts 
 
 This script combines the functionality of three previous versions (Azure, Groq, and OpenAI) into a single file, making it easy to switch between AI providers by commenting out unused sections or configuring a single variable.
 
+**Heads-Up:** The model was told to include the date in the title. It usually behaves. Occasionally, it forgets. You know how it is.
+
+While the data has been reviewed for accuracy, some hallucinations may still sneak through. If precision is critical, double-check before relying on the output.
+
 ## Prerequisites
 
 Before running the script, ensure you have the following installed:
