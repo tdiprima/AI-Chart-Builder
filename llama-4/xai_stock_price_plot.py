@@ -1,5 +1,7 @@
 """
 Llama-4 fake data
+xAI is a private company founded by Elon Musk, and it has remained private since its inception in March 2023.
+It's not a publicly traded company; therefore, it does not have a public stock price.
 """
 import pandas as pd
 import plotly.express as px

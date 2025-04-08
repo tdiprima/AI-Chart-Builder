@@ -4,7 +4,9 @@
 
 No more manually scripting visualizations. Just say what you want, and it builds it.
 
-**Heads-Up:** The code output has been sanity-checked, but due to the nature of AI, it's not immune to the occasional glitch or hallucination. Double-check the data if stakes are high.
+**Heads-Up:** The model was told to include the date in the title. It usually behaves. Occasionally, it forgets. You know how it is.
+
+While the data has been reviewed for accuracy, some hallucinations may still sneak through. If precision is critical, double-check before relying on the output.
 
 ## Usage
 

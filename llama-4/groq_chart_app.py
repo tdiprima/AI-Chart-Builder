@@ -1,21 +1,22 @@
 """
 AI Chart Builder (Groq Deployment)
 LLaMA 4 showed potential, but it didn't quite align with the specific needs of my project.
-I ran into a few reliability and instruction-following issues that made it tough to integrate effectively.
+I ran into a few instruction-following issues that made it tough to integrate effectively.
 LLaMA-4 is exhibiting a high level of creative inference, though not necessarily grounded in factual accuracy.
 I'm looking forward to seeing how future iterations evolve.
 
 Author: Tammy DiPrima (modified for Groq)
 """
+import datetime
 import os
+import re
+
 import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
+import pandas_datareader as pdr
 import plotly.express as px
 from dash import html, dcc, Input, Output, State, exceptions
-import re
-import pandas_datareader as pdr
-import datetime
 from dotenv import load_dotenv
 from groq import Groq
 
@@ -89,18 +90,16 @@ def generate_chart(submit_clicks, retry_clicks, prompt):
                 {
                     "role": "system",
                     "content": (
-                        "You are a Python developer tasked with generating ONLY Plotly Express code. "
-                        "Your response MUST contain ONLY the Python code with NO explanations, comments, "
+                        "You are a Python developer tasked with generating only Plotly Express code. "
+                        "Your response must contain ONLY the Python code with no explanations, comments, "
                         "or additional text. Do not include backticks, markdown, or any other formatting. "
-                        "The code should include ALL necessary data definitions (e.g., DataFrames or dictionaries) "
-                        "using REAL, HARDCODED data (do not make up fake data unless asked to!). "
-                        "Do NOT use any external packages beyond 'pandas' and 'plotly.express'. "
-                        "Specifically, DO NOT USE the 'yfinance' package or any other data-fetching libraries. "
-                        "If no real data is available or the prompt is unclear, return a bar chart with the title 'No data found' "
-                        "and include the current date (YYYY-MM-DD) in the title. "
-                        "The code must assign the final Plotly figure to a variable named 'fig'. "
-                        "Generate only the Plotly Express Python code. No explanations or text, just the code. "
-                        "Always give the date or dates of the data in the title; make it obvious."
+                        "The code should include all necessary data definitions (e.g., DataFrames or dictionaries), "
+                        "REAL data, python imports, and variable assignments. You MUST provide all data. "
+                        "Verify the existence of data being asked for, before attempting to plot. "
+                        "If there is no data, draw an empty chart with title saying \"No data found\". "
+                        "Do not reference any csv files. If you use package yfinance, be sure to return a 'fig' and do 'fig.show()'. "
+                        "You should convert the 2D array of shape (252, 1) into a 1D array, which is what plotly.express expects.  Example: y=data[\"Close\"].squeeze(). "
+                        "ALWAYS give the date or dates of the data in the title."
                     )
                 },
                 {
@@ -136,7 +135,7 @@ def generate_chart(submit_clicks, retry_clicks, prompt):
         code_lines = [
             line for line in code.split('\n')
             if not any(line.lower().startswith(start.lower()) for start in unwanted_starts)
-            and line.strip()
+               and line.strip()
         ]
         code = '\n'.join(code_lines)
 
