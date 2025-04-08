@@ -93,10 +93,11 @@ def generate_chart(submit_clicks, retry_clicks, prompt):
                     "or additional text. Do not include backticks, markdown, or any other formatting. "
                     "The code should include all necessary data definitions (e.g., DataFrames or dictionaries), "
                     "REAL data, python imports, and variable assignments. You MUST provide all data. "
-                    "Do not reference any csv files. DO NOT USE package yfinance. "
-                    "DO NOT GENERATE RANDOM DATA. If you cannot find any data, then return a chart with title saying \"No data found\". "
-                    "Always give the date or dates of the data in the title; make it obvious. "
-                    "Generate only the Plotly Express Python code. No explanations or text, just the code."
+                    "Verify the existence of data being asked for, before attempting to plot. "
+                    "If there is no data, draw an empty chart with title saying \"No data found\". "
+                    "Do not reference any csv files. If you use package yfinance, be sure to return a 'fig' and do 'fig.show()'. "
+                    "You should convert the 2D array of shape (252, 1) into a 1D array, which is what plotly.express expects.  Example: y=data[\"Close\"].squeeze(). "
+                    "ALWAYS give the date or dates of the data in the title."
                 )
             },
             {

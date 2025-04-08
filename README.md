@@ -4,6 +4,8 @@
 
 No more manually scripting visualizations. Just say what you want, and it builds it.
 
+**Heads-Up:** The code output has been sanity-checked, but due to the nature of AI, it's not immune to the occasional glitch or hallucination. Double-check the data if stakes are high.
+
 ## Usage
 
 ```sh
