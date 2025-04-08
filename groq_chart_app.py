@@ -1,9 +1,5 @@
 """
-AI Chart Builder (Groq Deployment)
-LLaMA 4 showed potential, but it didn't quite align with the specific needs of my project.
-I ran into a few instruction-following issues that made it tough to integrate effectively.
-LLaMA-4 is exhibiting a high level of creative inference, though not necessarily grounded in factual accuracy.
-I'm looking forward to seeing how future iterations evolve.
+AI Chart Builder (Groq Deployment, using LLaMA 4)
 
 Author: Tammy DiPrima (modified for Groq)
 """
