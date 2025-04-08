@@ -95,7 +95,7 @@ def generate_chart(submit_clicks, retry_clicks, prompt):
                     "REAL data, python imports, and variable assignments. You MUST provide all data. "
                     "Do not reference any csv files. DO NOT USE package yfinance. "
                     "DO NOT GENERATE RANDOM DATA. If you cannot find any data, then return a chart with title saying \"No data found\". "
-                    "Note the actual date of the dataset in the title of the chart. "
+                    "Always give the date or dates of the data in the title; make it obvious. "
                     "Generate only the Plotly Express Python code. No explanations or text, just the code."
                 )
             },
