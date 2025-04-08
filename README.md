@@ -1,66 +1,133 @@
-# AIChartBuilder
+# AI Chart Builder
 
-**AI Chart Builder** lets you type in a natural language prompt like *"Show a line chart of average patient heart rate over the past 7 days"* and then uses GPT-4o to generate the actual Python code to make that chart. The app runs the code and displays the chart right on the page using Plotly. It's built with Dash and handles errors gracefully, so if something goes wrong, it won't crash — it just tells you what happened.
+## Overview
 
-No more manually scripting visualizations. Just say what you want, and it builds it.
+The `ai_chart_builder.py` script is a unified application that generates charts based on user prompts using different AI services: Azure OpenAI, Groq, and OpenAI. It leverages Plotly for chart rendering and Dash for the web interface, allowing users to input prompts (e.g., "Line chart of average patient heart rate over 7 days") and generate visualizations dynamically.
 
-**Heads-Up:** The model was told to include the date in the title. It usually behaves. Occasionally, it forgets. You know how it is.
+This script combines the functionality of three previous versions (Azure, Groq, and OpenAI) into a single file, making it easy to switch between AI providers by commenting out unused sections or configuring a single variable.
 
-While the data has been reviewed for accuracy, some hallucinations may still sneak through. If precision is critical, double-check before relying on the output.
+## Prerequisites
+
+Before running the script, ensure you have the following installed:
+
+- Python 3.8 or higher
+- Required Python packages (listed in the "Installation" section below)
+- An API key and endpoint for at least one of the following AI services:
+  - Azure OpenAI
+  - Groq
+  - OpenAI
+
+## Installation
+
+### 1. Clone or Download the Script
+
+Download the `ai_chart_builder.py` file to your local machine or clone the repository if it’s part of a larger project.
+
+### 2. Install Dependencies
+
+Install the required Python packages using pip. Run the following command in your terminal or command prompt:
+
+```bash
+pip install dash dash-bootstrap-components pandas plotly pandas-datareader openai groq python-dotenv
+```
+
+### 3. Set Up Environment Variables
+
+Create a `.env` file in the same directory as the script to store your API keys and endpoints. The file should include the following variables (use only the ones relevant to the AI provider you plan to use):
+
+```env
+# For Azure OpenAI
+AZURE_OPENAI_ENDPOINT=your_azure_endpoint
+AZURE_OPENAI_KEY=your_azure_api_key
+OPENAI_API_VERSION=your_api_version  # e.g., "2023-05-15"
+
+# For Groq
+GROQ_API_KEY=your_groq_api_key
+
+# For OpenAI
+# No additional variables needed if using default OpenAI configuration
+```
+
+Replace `your_azure_endpoint`, `your_azure_api_key`, `your_api_version`, and `your_groq_api_key` with your actual API credentials and endpoints.
 
 ## Usage
 
-```sh
-python script.py
+### 1. Configure the AI Provider
+
+Open `ai_chart_builder.py` and locate the following line near the top of the file:
+
+```python
+AI_PROVIDER = "openai"  # Options: "azure", "groq", "openai"
 ```
 
-Navigate to: http://127.0.0.1:8050/
+Set `AI_PROVIDER` to the AI service you want to use:
 
-## Example Prompts
+- `"azure"` for Azure OpenAI
+- `"groq"` for Groq
+- `"openai"` for OpenAI
 
-Here are some example prompts you can use with the Plotly AI/Dash app to generate charts:
+If you only want to use one provider, comment out the configuration blocks for the other providers. For example, to use only OpenAI, comment out the `if AI_PROVIDER == "azure":` and `elif AI_PROVIDER == "groq":` blocks (including their `client` definitions and API call sections in the `generate_chart` function).
 
-**Simple Charts**
+### 2. Run the Script
 
-1. Plot a line chart of the stock prices of Apple over the past year.
-2. Create a bar chart of the top 5 countries by GDP.
-3. Show a pie chart of the distribution of ages in a population.
+Launch the script by running the following command in your terminal or command prompt from the directory containing the script:
 
-**Time Series Charts**
+```bash
+python ai_chart_builder.py
+```
 
-1. Plot the daily closing prices of the S&P 500 index for the past year.
-2. Create a chart of the average temperature in New York City over the past year.
-3. Show a chart of the number of COVID-19 cases in the United States over the past 6 months.
+This will start a local web server, and the Dash app will be accessible in your web browser at `http://127.0.0.1:8050/` (or another port if 8050 is in use).
 
-**Geographic Charts**
+### 3. Use the Web Interface
 
-1. Plot a map of the world showing the population density of each country.
-2. Create a chart of the top 10 cities by population density in the United States.
-3. Show a chart of the average temperature in different regions of the world.
+Once the app is running:
 
-**Custom Charts**
+- You’ll see a web interface with a text area where you can enter a prompt (e.g., "Line chart of average patient heart rate over 7 days").
+- If using OpenAI or Azure, you can select a model from the dropdown menu (e.g., "GPT-4o", "GPT-3.5 Turbo").
+- Click the "Generate Chart" button to create a chart based on your prompt.
+- If there’s an error, an error message will appear, and you can click "Retry" to try again.
 
-1. Plot a scatter plot of the relationship between GDP and population for different countries.
-2. Create a chart of the top 5 most popular books on Amazon over the past month.
-3. Show a chart of the average commute time in different cities in the United States.
+### 4. Switching Providers
 
-**Fun Charts**
+To switch between AI providers:
 
-1. Plot a chart of the most popular memes on the internet over the past year.
-2. Create a chart of the top 10 most expensive cars in the world.
-3. Show a chart of the average height of NBA players over the past year.
+- Change the `AI_PROVIDER` variable at the top of the script.
+- Ensure the corresponding API keys and endpoints are set in your `.env` file.
+- Comment out unused provider blocks to avoid import errors or unnecessary code execution.
 
-<!-- 
-Here are ten example prompts aimed at generating relatively small or straightforward data sets:
+For example, if you only want to use Groq, comment out the Azure and OpenAI blocks as shown below:
 
-1. Plot a line chart of the stock prices of Apple over the past year.
-2. Create a bar chart of the top 5 countries by GDP.
-3. Plot a map of the world showing the population density of each country.
-4. Generate a pie chart of the 5 most-used social media platforms among a group of 100 people. 
-5. Plot a line chart showing monthly temperature averages in 3 different cities.
-6. Create a bar chart comparing the monthly sales of three products over 6 months.
-7. Plot a scatter chart for 10 sample data points (x vs. y) to visualize any potential correlation.
-8. Generate a stacked bar chart of three categories of expenses (e.g., rent, food, utilities) across 4 months.
-9. Plot a pie chart of the distribution of 5 movie genres based on the number of films in a small festival.
-10. Create a bar chart comparing the average daily step counts for a group of 5 friends over 1 week.
--->
+```python
+# Comment out these blocks if not using:
+# if AI_PROVIDER == "azure":
+#     from openai import AzureOpenAI
+#     client = AzureOpenAI(...)
+
+# Only keep this block if using OpenAI:
+elif AI_PROVIDER == "openai":
+    from openai import OpenAI
+    client = OpenAI()
+```
+
+## Features
+
+- Supports multiple AI providers (Azure, Groq, OpenAI) in a single script.
+- Generates Plotly Express charts based on user prompts.
+- Includes error handling for API failures, invalid code, and data issues.
+- Provides a user-friendly Dash web interface with loading indicators and retry options.
+- Allows model selection for OpenAI and Azure (via dropdown).
+
+## Troubleshooting
+
+- **API Errors**: If you see errors related to API keys or network connections, check your `.env` file for correct credentials and ensure your internet connection is stable.
+- **Invalid Code**: If the AI generates invalid Python code, refine your prompt or try a different AI provider/model. The error message will guide you (e.g., "The AI generated invalid code. Please refine your prompt and try again.").
+- **No Data Found**: If the chart shows "No data found," ensure your prompt requests existing data or adjust the prompt to use sample data.
+- **Dependencies Missing**: If you encounter import errors, verify that all required packages are installed (see "Installation" above).
+
+## Contributing
+
+If you’d like to contribute to this script, feel free to fork the repository, make changes, and submit pull requests. Bug reports and feature requests are also welcome!
+
+## License
+
+This script is provided under the MIT License. See the [LICENSE](LICENSE) file for more details.
