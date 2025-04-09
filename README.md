@@ -12,8 +12,6 @@ Built with Plotly + Dash. Just type your prompt ("Bar chart of sales by region")
 - Web UI with prompt box + model picker  
 - Handles errors, shows retries, and gives you Plotly charts like magic
 
-> *Heads-up:* Sometimes the model forgets to put the date in the title. Sometimes it hallucinates. Don't trust it with your taxes.
-
 ---
 
 ## 🚀 Quickstart
@@ -82,8 +80,10 @@ Open [http://localhost:8050](http://localhost:8050) and go wild.
 
 Fork, tweak, PR, repeat. Open to ideas, bug reports, and feature adds.
 
+> *Heads-up:* Sometimes the model forgets to put the date in the title. Sometimes it hallucinates. Don't trust it with your taxes.
+
 ---
 
 ## 📄 License
 
-[MIT](LICENSE). Go nuts.
+[MIT](LICENSE). Go nuts — just credit me when you use it.
