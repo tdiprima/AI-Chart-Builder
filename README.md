@@ -1,137 +1,89 @@
-# AI Chart Builder
+# ⚡ AI Chart Builder
 
-## Overview
+Turn plain English into clean, dynamic charts — powered by GPT-4o, LLaMA 4, or whatever AI provider fits your vibe.
 
-The `ai_chart_builder.py` script is a unified application that generates charts based on user prompts using different AI services: Azure OpenAI, Groq, and OpenAI. It leverages Plotly for chart rendering and Dash for the web interface, allowing users to input prompts (e.g., "Line chart of average patient heart rate over 7 days") and generate visualizations dynamically.
+Built with Plotly + Dash. Just type your prompt ("Bar chart of sales by region"), and boom: chart.
 
-This script combines the functionality of three previous versions (Azure, Groq, and OpenAI) into a single file, making it easy to switch between AI providers by commenting out unused sections or configuring a single variable.
+## 🧠 What's Inside
 
-**Heads-Up:** The model was told to include the date in the title. It usually behaves. Occasionally, it forgets. You know how it is.
+- One unified script: `ai_chart_builder.py`  
+- Choose from **Azure OpenAI**, **OpenAI**, or **Groq (LLaMA 4)**  
+- Easy switch via a single `AI_PROVIDER` variable  
+- Web UI with prompt box + model picker  
+- Handles errors, shows retries, and gives you Plotly charts like magic
 
-While the data has been reviewed for accuracy, some hallucinations may still sneak through. If precision is critical, double-check before relying on the output.
+> *Heads-up:* Sometimes the model forgets to put the date in the title. Sometimes it hallucinates. Don't trust it with your taxes.
 
-## Prerequisites
+---
 
-Before running the script, ensure you have the following installed:
+## 🚀 Quickstart
 
-- Python 3.8 or higher
-- Required Python packages (listed in the "Installation" section below)
-- An API key and endpoint for at least one of the following AI services:
-  - Azure OpenAI
-  - Groq
-  - OpenAI
+### 1. Clone it  
+Download or clone the repo. Make sure you have Python 3.8+.
 
-## Installation
-
-### 1. Clone or Download the Script
-
-Download the `ai_chart_builder.py` file to your local machine or clone the repository if it’s part of a larger project.
-
-### 2. Install Dependencies
-
-Install the required Python packages using pip. Run the following command in your terminal or command prompt:
-
+### 2. Install deps  
 ```bash
 pip install dash dash-bootstrap-components pandas plotly pandas-datareader openai groq python-dotenv
 ```
 
-### 3. Set Up Environment Variables
-
-Create a `.env` file in the same directory as the script to store your API keys and endpoints. The file should include the following variables (use only the ones relevant to the AI provider you plan to use):
+### 3. Set up `.env`  
+Create a `.env` file next to the script with any of these:
 
 ```env
-# For Azure OpenAI
+# Azure
 AZURE_OPENAI_ENDPOINT=your_azure_endpoint
-AZURE_OPENAI_KEY=your_azure_api_key
-OPENAI_API_VERSION=your_api_version  # e.g., "2023-05-15"
+AZURE_OPENAI_KEY=your_key
+OPENAI_API_VERSION=2023-05-15
 
-# For Groq
-GROQ_API_KEY=your_groq_api_key
-
-# For OpenAI
-# No additional variables needed if using default OpenAI configuration
+# Groq
+GROQ_API_KEY=your_groq_key
 ```
 
-Replace `your_azure_endpoint`, `your_azure_api_key`, `your_api_version`, and `your_groq_api_key` with your actual API credentials and endpoints.
+(OpenAI uses your default config — no extra setup needed.)
 
-## Usage
-
-### 1. Configure the AI Provider
-
-Open `ai_chart_builder.py` and locate the following line near the top of the file:
+### 4. Pick your AI provider  
+At the top of `ai_chart_builder.py`:
 
 ```python
 AI_PROVIDER = "openai"  # Options: "azure", "groq", "openai"
 ```
 
-Set `AI_PROVIDER` to the AI service you want to use:
+Comment out the config blocks for the providers you *don’t* use.
 
-- `"azure"` for Azure OpenAI
-- `"groq"` for Groq
-- `"openai"` for OpenAI
-
-If you only want to use one provider, comment out the configuration blocks for the other providers. For example, to use only OpenAI, comment out the `if AI_PROVIDER == "azure":` and `elif AI_PROVIDER == "groq":` blocks (including their `client` definitions and API call sections in the `generate_chart` function).
-
-### 2. Run the Script
-
-Launch the script by running the following command in your terminal or command prompt from the directory containing the script:
-
+### 5. Run it  
 ```bash
 python ai_chart_builder.py
 ```
 
-This will start a local web server, and the Dash app will be accessible in your web browser at `http://127.0.0.1:8050/` (or another port if 8050 is in use).
+Open [http://localhost:8050](http://localhost:8050) and go wild.
 
-### 3. Use the Web Interface
+---
 
-Once the app is running:
+## 🛠 Features
 
-- You’ll see a web interface with a text area where you can enter a prompt (e.g., "Line chart of average patient heart rate over 7 days").
-- If using OpenAI or Azure, you can select a model from the dropdown menu (e.g., "GPT-4o", "GPT-3.5 Turbo").
-- Click the "Generate Chart" button to create a chart based on your prompt.
-- If there’s an error, an error message will appear, and you can click "Retry" to try again.
+- 🔄 Easily switch between providers  
+- 📊 Natural language → Plotly charts  
+- 🧠 Supports model selection (GPT-4o, 3.5, etc.)  
+- 🧼 Handles errors + retries  
+- 👁️‍🗨️ Clean Dash interface with spinner + logs  
 
-### 4. Switching Providers
+---
 
-To switch between AI providers:
+## 🤯 Troubleshooting
 
-- Change the `AI_PROVIDER` variable at the top of the script.
-- Ensure the corresponding API keys and endpoints are set in your `.env` file.
-- Comment out unused provider blocks to avoid import errors or unnecessary code execution.
+- **API errors?** Check your `.env`.  
+- **No data?** Prompt might be too vague.  
+- **Weird chart?** That’s the AI being quirky. Try again or switch models.  
+- **Missing packages?** Reinstall with `pip`.
 
-For example, if you only want to use Groq, comment out the Azure and OpenAI blocks as shown below:
+---
 
-```python
-# Comment out these blocks if not using:
-# if AI_PROVIDER == "azure":
-#     from openai import AzureOpenAI
-#     client = AzureOpenAI(...)
+## 🙌 Contribute
 
-# Only keep this block if using OpenAI:
-elif AI_PROVIDER == "openai":
-    from openai import OpenAI
-    client = OpenAI()
-```
+Fork, tweak, PR, repeat. Open to ideas, bug reports, and feature adds.
 
-## Features
+---
 
-- Supports multiple AI providers (Azure, Groq, OpenAI) in a single script.
-- Generates Plotly Express charts based on user prompts.
-- Includes error handling for API failures, invalid code, and data issues.
-- Provides a user-friendly Dash web interface with loading indicators and retry options.
-- Allows model selection for OpenAI and Azure (via dropdown).
+## 📄 License
 
-## Troubleshooting
-
-- **API Errors**: If you see errors related to API keys or network connections, check your `.env` file for correct credentials and ensure your internet connection is stable.
-- **Invalid Code**: If the AI generates invalid Python code, refine your prompt or try a different AI provider/model. The error message will guide you (e.g., "The AI generated invalid code. Please refine your prompt and try again.").
-- **No Data Found**: If the chart shows "No data found," ensure your prompt requests existing data or adjust the prompt to use sample data.
-- **Dependencies Missing**: If you encounter import errors, verify that all required packages are installed (see "Installation" above).
-
-## Contributing
-
-If you’d like to contribute to this script, feel free to fork the repository, make changes, and submit pull requests. Bug reports and feature requests are also welcome!
-
-## License
-
-This script is provided under the MIT License. See the [LICENSE](LICENSE) file for more details.
+[MIT](LICENSE). Go nuts.
