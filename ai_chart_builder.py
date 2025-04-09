@@ -224,7 +224,7 @@ def generate_chart(submit_clicks, retry_clicks, prompt, selected_model=None):
         ]
         code = '\n'.join(code_lines)
 
-        print(code)
+        # print(code)  # DEBUG
 
         # Ensure there's still some code left
         if not code:
