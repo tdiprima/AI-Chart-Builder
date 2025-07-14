@@ -2,7 +2,7 @@
 AI Chart Builder (Combined Azure, Groq, and OpenAI)
 This app uses different AI services (Azure, Groq, or OpenAI) to generate charts based on user input and Plotly to render the charts.
 
-Author: Tammy DiPrima (modified for multiple providers)
+Author: Tammy DiPrima
 """
 import datetime
 import os
@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Choose AI provider (comment out the ones you don't want to use)
-AI_PROVIDER = "azure"  # Options: "azure", "groq", "openai"
+# TODO: Choose AI provider (comment out the ones you don't want to use)
+AI_PROVIDER = "openai"  # Options: "azure", "groq", "openai"
 
 # Define the system message content once
 SYSTEM_MESSAGE_CONTENT = (
@@ -37,52 +37,107 @@ SYSTEM_MESSAGE_CONTENT = (
 )
 
 # ==============================
-# AI Service Configurations
+# Unified AI Service Configuration
 # ==============================
 
-# Azure OpenAI Configuration (comment out if not using)
-if AI_PROVIDER == "azure":
-    from openai import AzureOpenAI
+def get_ai_client():
+    """Initialize and return the appropriate AI client based on AI_PROVIDER"""
+    if AI_PROVIDER == "azure":
+        from openai import AzureOpenAI
+        return AzureOpenAI(
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_KEY"),
+            api_version=os.getenv("OPENAI_API_VERSION")
+        )
+    elif AI_PROVIDER == "groq":
+        from groq import Groq
+        return Groq(api_key=os.getenv("GROQ_API_KEY"))
+    elif AI_PROVIDER == "openai":
+        from openai import OpenAI
+        return OpenAI()
+    else:
+        raise ValueError("Invalid AI_PROVIDER. Choose 'azure', 'groq', or 'openai'.")
 
-    client = AzureOpenAI(
-        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        api_key=os.getenv("AZURE_OPENAI_KEY"),
-        api_version=os.getenv("OPENAI_API_VERSION")
-    )
+def get_ai_response(client, prompt, selected_model=None):
+    """Get AI response with provider-specific configurations"""
+    messages = [
+        {"role": "system", "content": SYSTEM_MESSAGE_CONTENT},
+        {
+            "role": "user",
+            "content": f"Generate only the Plotly Express Python code for: {prompt}. No explanations or text, just the code."
+        }
+    ]
+    
+    # Provider-specific configurations
+    configs = {
+        "azure": {
+            "model": os.getenv("DEPLOYMENT_NAME"),
+            "max_tokens": 500,
+            "temperature": 0.2,
+            "top_p": 0.1
+        },
+        "groq": {
+            "model": "compound-beta-mini",
+            "max_tokens": 4096,
+            "temperature": 0.05,
+            "top_p": 0.05,
+            "timeout": 30
+        },
+        "openai": {
+            "model": selected_model or "gpt-4o",
+            "max_tokens": 500,
+            "temperature": 0.2,
+            "top_p": 0.1
+        }
+    }
+    
+    return client.chat.completions.create(messages=messages, **configs[AI_PROVIDER])
 
-# Groq Configuration (comment out if not using)
-elif AI_PROVIDER == "groq":
-    from groq import Groq
+def clean_generated_code(code):
+    """Clean and filter the generated code"""
+    # Remove markdown formatting
+    code = re.sub(r"```(?:python)?|```", "", code).strip()
+    
+    # Remove specific unwanted lines
+    unwanted_lines = [
+        "YF.download() has changed argument auto_adjust default to True",
+        "[*********************100%***********************]  1 of 1 completed"
+    ]
+    for unwanted in unwanted_lines:
+        code = code.replace(unwanted, "")
+    
+    # Filter out lines with unwanted starts
+    unwanted_starts = ['here is', 'below is', 'the code', 'this code', 'note:']
+    code_lines = [
+        line for line in code.split('\n')
+        if not any(line.lower().startswith(start.lower()) for start in unwanted_starts)
+           and line.strip()
+    ]
+    
+    return '\n'.join(code_lines)
 
-    client = Groq(
-        api_key=os.getenv("GROQ_API_KEY")
-    )
-
-# OpenAI Configuration (comment out if not using)
-elif AI_PROVIDER == "openai":
-    from openai import OpenAI
-
-    client = OpenAI()
-
-else:
-    raise ValueError("Invalid AI_PROVIDER. Choose 'azure', 'groq', or 'openai'.")
+# Initialize client once
+client = get_ai_client()
 
 # Dash App Setup
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+# Model options only for OpenAI/Azure
+model_options = [
+    {'label': 'GPT-3.5 Turbo', 'value': 'gpt-3.5-turbo'},
+    {'label': 'GPT-4o', 'value': 'gpt-4o'},
+    {'label': 'GPT-4o Mini', 'value': 'gpt-4o-mini'},
+    {'label': 'GPT-4.5 Preview', 'value': 'gpt-4.5-preview'},
+    {'label': 'o1 Mini', 'value': 'o1-mini'}
+] if AI_PROVIDER in ["openai", "azure"] else []
 
 app.layout = html.Div([
     html.H2("AI Chart Builder", style={'textAlign': 'center'}),
     dcc.Dropdown(
         id='model-dropdown',
-        options=[
-            {'label': 'GPT-3.5 Turbo', 'value': 'gpt-3.5-turbo'},
-            {'label': 'GPT-4o', 'value': 'gpt-4o'},
-            {'label': 'GPT-4o Mini', 'value': 'gpt-4o-mini'},
-            {'label': 'GPT-4.5 Preview', 'value': 'gpt-4.5-preview'},
-            {'label': 'o1 Mini', 'value': 'o1-mini'}
-        ] if AI_PROVIDER in ["openai", "azure"] else [],
-        value='gpt-4o',  # Default model for OpenAI/Azure
-        style={'width': '100%', 'marginBottom': 10}
+        options=model_options,
+        value='gpt-4o' if model_options else None,
+        style={'width': '100%', 'marginBottom': 10, 'display': 'block' if model_options else 'none'}
     ),
     dcc.Textarea(
         id='prompt',
@@ -114,154 +169,71 @@ app.layout = html.Div([
     ],
     [
         State('prompt', 'value'),
-        State('model-dropdown', 'value') if AI_PROVIDER in ["openai", "azure"] else State('prompt', 'value')
+        State('model-dropdown', 'value')
     ],
     prevent_initial_call=True
 )
-def generate_chart(submit_clicks, retry_clicks, prompt, selected_model=None):
+def generate_chart(submit_clicks, retry_clicks, prompt, selected_model):
+    """Generate chart based on user prompt using selected AI model"""
     ctx = dash.callback_context
-
+    
     if not ctx.triggered:
         raise exceptions.PreventUpdate
-
-    # Clear previous chart and error
+    
+    # Initialize outputs
     fig = {}
     error_msg = ""
     feedback = ""
-
-    # Check if prompt is empty or just whitespace
-    if not prompt or not prompt.strip():
-        return fig, "Error: Please enter a prompt.", feedback, {'display': 'none'}
-
-    # Provide initial feedback
-    feedback = "Generating chart... This may take a moment."
     retry_style = {'display': 'none'}
-
+    
+    # Validate prompt
+    if not prompt or not prompt.strip():
+        return fig, "Error: Please enter a prompt.", feedback, retry_style
+    
+    feedback = "Generating chart... This may take a moment."
+    
     try:
-        # Prepare API call based on provider
-        if AI_PROVIDER == "azure":
-            response = client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": SYSTEM_MESSAGE_CONTENT
-                    },
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Generate only the Plotly Express Python code for: {prompt}. "
-                            "No explanations or text, just the code."
-                        )
-                    }
-                ],
-                model=os.getenv("DEPLOYMENT_NAME"),
-                max_tokens=500,
-                temperature=0.2,
-                top_p=0.1
-            )
-
-        elif AI_PROVIDER == "groq":
-            response = client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": SYSTEM_MESSAGE_CONTENT
-                    },
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Generate only the Plotly Express Python code for: {prompt}. "
-                            "No explanations or text, just the code."
-                        )
-                    }
-                ],
-                model="meta-llama/llama-4-scout-17b-16e-instruct",
-                max_tokens=4096,
-                temperature=0.05,
-                top_p=0.05,
-                timeout=30
-            )
-
-        else:  # OpenAI
-            response = client.chat.completions.create(
-                model=selected_model if selected_model else "gpt-4o",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": SYSTEM_MESSAGE_CONTENT
-                    },
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Generate only the Plotly Express Python code for: {prompt}. "
-                            "No explanations or text, just the code."
-                        )
-                    }
-                ],
-                max_tokens=500,
-                temperature=0.2,
-                top_p=0.1
-            )
-
-        # Extract and clean the generated code (common for all providers)
+        # Get AI response
+        response = get_ai_response(client, prompt, selected_model)
+        
+        # Extract and clean code
         code = response.choices[0].message.content.strip()
-        code = re.sub(r"```(?:python)?|```", "", code).strip()
-
-        # Remove specific unwanted lines or text
-        unwanted_lines = [
-            "YF.download() has changed argument auto_adjust default to True",
-            "[*********************100%***********************]  1 of 1 completed"
-        ]
-        for unwanted in unwanted_lines:
-            code = code.replace(unwanted, "")
-
-        # Filter out lines that start with unwanted keywords
-        unwanted_starts = ['here is', 'below is', 'the code', 'this code', 'note:']
-        code_lines = [
-            line for line in code.split('\n')
-            if not any(line.lower().startswith(start.lower()) for start in unwanted_starts)
-               and line.strip()
-        ]
-        code = '\n'.join(code_lines)
-
-        # print(code)  # DEBUG
-
-        # Ensure there's still some code left
+        code = clean_generated_code(code)
+        
+        # Validate code exists
         if not code:
             raise ValueError("No valid code remaining after filtering.")
-
+        
         # Execute the code
         local_vars = {'px': px, 'pd': pd, 'pdr': pdr, 'datetime': datetime}
         exec(code, {}, local_vars)
-
+        
+        # Validate figure was created
         if 'fig' not in local_vars or local_vars['fig'] is None:
             raise ValueError("Failed to generate a valid Plotly figure. The figure object is None.")
-
-        # Return the new figure (error/feedback cleared)
+        
         return local_vars['fig'], "", "", {'display': 'none'}
-
+        
     except Exception as e:
-        error_msg = "Error: An issue occurred while generating the chart. "
-
-        if "API" in str(e) or any(provider in str(e).lower() for provider in ["azure", "groq", "openai"]):
-            error_msg += "Please check your API key or network connection."
-        elif "invalid syntax" in str(e) or "NameError" in str(e):
-            error_msg += "The AI generated invalid code. Please refine your prompt and try again."
-        elif "unexpected text" in str(e):
-            error_msg += "The AI included extra text instead of just code. Please try again or adjust the prompt."
-        elif "No valid code" in str(e) or "Failed to generate a valid Plotly figure" in str(e):
-            error_msg += (
-                "The chart could not be created. Check if the data or prompt is valid, "
-                "or try a different chart type."
-            )
-        else:
-            error_msg += (
-                f"Unexpected error: {str(e)}. "
-                "Please try a different prompt or contact support."
-            )
-
-        print(e)
+        error_msg = generate_error_message(e)
+        print(e)  # For debugging
         return {}, error_msg, "", {'display': 'block'}
+
+
+def generate_error_message(error):
+    """Generate user-friendly error messages based on exception type"""
+    error_str = str(error)
+    
+    if "API" in error_str or any(provider in error_str.lower() for provider in ["azure", "groq", "openai"]):
+        return "Error: An issue occurred while generating the chart. Please check your API key or network connection."
+    elif "invalid syntax" in error_str or "NameError" in error_str:
+        return "Error: The AI generated invalid code. Please refine your prompt and try again."
+    elif "unexpected text" in error_str:
+        return "Error: The AI included extra text instead of just code. Please try again or adjust the prompt."
+    elif "No valid code" in error_str or "Failed to generate a valid Plotly figure" in error_str:
+        return "Error: The chart could not be created. Check if the data or prompt is valid, or try a different chart type."
+    else:
+        return f"Error: Unexpected error: {error_str}. Please try a different prompt or contact support."
 
 
 if __name__ == '__main__':

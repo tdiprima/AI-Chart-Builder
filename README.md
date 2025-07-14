@@ -24,7 +24,7 @@ Download or clone the repo. Make sure you have Python 3.8+.
 pip install dash dash-bootstrap-components pandas plotly pandas-datareader openai groq python-dotenv
 ```
 
-### 3. Set up `.env`  
+### 3. Set up .env  
 Create a `.env` file next to the script with any of these:
 
 ```env
@@ -48,7 +48,8 @@ AI_PROVIDER = "openai"  # Options: "azure", "groq", "openai"
 
 Comment out the config blocks for the providers you *don’t* use.
 
-### 5. Run it  
+### 5. Run it
+
 ```bash
 python ai_chart_builder.py
 ```
@@ -80,7 +81,7 @@ Open [http://localhost:8050](http://localhost:8050) and go wild.
 
 Fork, tweak, PR, repeat. Open to ideas, bug reports, and feature adds.
 
-> *Heads-up:* Sometimes the model forgets to put the date in the title. Sometimes it hallucinates. Don't trust it with your taxes.
+***Heads-up:*** Sometimes the model forgets to put the date in the title. Sometimes it hallucinates. Don't trust it with your taxes.
 
 ---
 
